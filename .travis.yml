@@ -1,0 +1,20 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+    - docker build -f ./client/Dockerfile.dev -t anchunliang/react-client-test ./client
+
+script:
+    - docker run -e CI=True anchunliang/react-client-test npm test
+
+after_success:
+    - docker build -t anchunliang/multi-docker-client ./client
+    - docker build -t anchunliang/multi-docker-nginx ./nginx
+    - docker build -t anchunliang/multi-docker-server ./server
+    - docker build -t anchunliang/multi-docker-worker ./worker
+    - docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
+    - docker push anchunliang/multi-docker-client
+    - docker push anchunliang/multi-docker-nginx 
+    - docker push anchunliang/multi-docker-server
+    - docker push anchunliang/multi-docker-worker
